@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "doc-group-by-meta-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/docGroupByMeta/DocGroupByMetaWebPart.js",
+          "manifest": "./src/webparts/docGroupByMeta/DocGroupByMetaWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "DocGroupByMetaWebPartStrings": "lib/webparts/docGroupByMeta/loc/{locale}.js"
+  }
+}

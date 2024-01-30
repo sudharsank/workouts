@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "16.20.0",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.18.2",
+    "libraryName": "workout",
+    "libraryId": "4df9c8fd-c08f-49d7-8ed1-c3ed870d2c5e",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "workout",
+    "solutionShortDescription": "workout description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}
