@@ -4,7 +4,8 @@ import styles from './DocGroupByMeta.module.scss';
 import type { IDocGroupByMetaProps } from './IDocGroupByMetaProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import * as _ from 'lodash';
-import { DetailsList, IColumn, IDetailsList, IGroup } from '@fluentui/react';
+import { DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsHeaderProps, IDetailsList, IGroup, IGroupDividerProps, IRenderFunction, Icon, Link, SelectionMode, Stack } from '@fluentui/react';
+import { GroupedListV2FC } from '@fluentui/react/lib/GroupedList';
 
 const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 	const {
@@ -31,7 +32,7 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 									</ViewFields>
 								</View>`
 		let docs = await props.sp.web.lists.getByTitle('Documents').getItemsByCAMLQuery({ ViewXml: query }, 'FileRef,FileLeafRef');
-		console.log(docs[0].Categories0.Label);
+		docs = _.sortBy(docs, 'Categories0.Label');
 		var groupedDocs = _.groupBy(docs, 'Categories0.Label');
 		let docGroups: IGroup[] = [];
 		_.map(groupedDocs, (value, groupkey) => {
@@ -46,28 +47,40 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 		});
 		setItems(docs);
 		setGroups(docGroups);
-		console.log('Documents: ', docGroups);
 	};
 
 	const root = React.useRef<IDetailsList>(null);
 	const [columns] = React.useState<IColumn[]>([
 		{ key: 'name', name: 'Name', fieldName: 'FileLeafRef', minWidth: 100, maxWidth: 200, isResizable: true },
-		{ key: 'color', name: 'Color', fieldName: 'Categories0.Label', minWidth: 100, maxWidth: 200 },
 	]);
 
-	// const [items, setItems] = React.useState<any[]>([
-	// 	{ key: 'a', name: 'a', color: 'red' },
-	// 	{ key: 'b', name: 'b', color: 'red' },
-	// 	{ key: 'c', name: 'c', color: 'blue' },
-	// 	{ key: 'd', name: 'd', color: 'blue' },
-	// 	{ key: 'e', name: 'e', color: 'blue' },
-	// ]);
+	const _openSearchPage = (keyword: string): void => {
+		window.open(`${window.location.origin}/_layouts/15/search.aspx/?q=${keyword}`, '_blank');
+	};
 
-	// const [groups, setGroups] = React.useState<IGroup[]>([
-	// 	{ key: 'groupred0', name: 'Color: "red"', startIndex: 0, count: 2, level: 0 },
-	// 	{ key: 'groupgreen2', name: 'Color: "green"', startIndex: 2, count: 0, level: 0 },
-	// 	{ key: 'groupblue2', name: 'Color: "blue"', startIndex: 2, count: 3, level: 0 },
-	// ]);
+	const _onToggleCollapse = (props: IGroupDividerProps) => {
+		return () => props!.onToggleCollapse!(props!.group!);
+	};
+
+	const _onRenderGroupHeader: IDetailsGroupRenderProps['onRenderHeader'] = props => {
+		if (props) {
+			return (
+				<Stack tokens={{ childrenGap: 10 }} horizontal horizontalAlign='start' style={{ marginTop: '10px' }}>
+					<Stack.Item>
+						<Link onClick={_onToggleCollapse(props)} style={{marginTop: '3px'}}>
+							{props.group!.isCollapsed ? <Icon iconName='CaretRight8' /> : <Icon iconName='CaretDown8' />}
+						</Link>
+					</Stack.Item>
+					<Stack.Item style={{ fontSize: 15 }}>
+						{props.group?.name} ({props.group?.count}) -
+					</Stack.Item>
+					<Stack.Item>
+						<Link onClick={() => _openSearchPage(props.group?.name)} style={{marginTop: '2px'}}>Show More...</Link>
+					</Stack.Item>
+				</Stack>
+			)
+		}
+	};
 
 	useEffect(() => {
 		(async () => {
@@ -93,13 +106,11 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 					ariaLabelForSelectionColumn="Toggle selection"
 					checkButtonAriaLabel="select row"
 					checkButtonGroupAriaLabel="select section"
-				// onRenderDetailsHeader={onRenderDetailsHeader}
-				// groupProps={{
-				// 	showEmptyGroups: true,
-				// 	groupedListAs: GroupedListV2,
-				// }}
-				// onRenderItemColumn={onRenderColumn}
-				// compact={isCompactMode}
+					groupProps={{
+						onRenderHeader: _onRenderGroupHeader,
+						groupedListAs: GroupedListV2FC
+					}}
+					selectionMode={SelectionMode.none}
 				/>
 			</div>
 		</section>
