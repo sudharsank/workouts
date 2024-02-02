@@ -4,7 +4,7 @@ import styles from './DocGroupByMeta.module.scss';
 import type { IDocGroupByMetaProps } from './IDocGroupByMetaProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import * as _ from 'lodash';
-import { DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsHeaderProps, IDetailsList, IGroup, IGroupDividerProps, IRenderFunction, Icon, Link, SelectionMode, Stack } from '@fluentui/react';
+import { DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsHeaderProps, IDetailsList, IGroup, IGroupDividerProps, IRenderFunction, Icon, Link, MessageBar, MessageBarType, SelectionMode, Stack } from '@fluentui/react';
 import { GroupedListV2FC } from '@fluentui/react/lib/GroupedList';
 
 const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
@@ -18,7 +18,7 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 	const [items, setItems] = useState<any[]>([]);
 	const [groups, setGroups] = React.useState<IGroup[]>([]);
 
-	const demo = async () => {
+	const loadDocuments = async () => {
 		// const tempQuery = `<Where>
 		// 						<Contains>
 		// 							<FieldRef Name="Categories0"/>
@@ -27,13 +27,13 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 		// 					</Where>`;
 		const query: string = `<View Scope="RecursiveAll"><Query></Query>
 									<ViewFields>
-										<FieldRef Name='Categories0'/><FieldRef Name='FileRef'/>
+										<FieldRef Name='${props.metadataFieldName}'/><FieldRef Name='FileRef'/>
 										<FieldRef Name='FileLeafRef'/>
 									</ViewFields>
 								</View>`
-		let docs = await props.sp.web.lists.getByTitle('Documents').getItemsByCAMLQuery({ ViewXml: query }, 'FileRef,FileLeafRef');
-		docs = _.sortBy(docs, 'Categories0.Label');
-		var groupedDocs = _.groupBy(docs, 'Categories0.Label');
+		let docs = await props.sp.web.lists.getByTitle(props.docLibraryName).getItemsByCAMLQuery({ ViewXml: query }, 'FileRef,FileLeafRef');
+		docs = _.sortBy(docs, `${props.metadataFieldName}.Label`);
+		var groupedDocs = _.groupBy(docs, `${props.metadataFieldName}.Label`);
 		let docGroups: IGroup[] = [];
 		_.map(groupedDocs, (value, groupkey) => {
 			docGroups.push({
@@ -55,7 +55,7 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 	]);
 
 	const _openSearchPage = (keyword: string): void => {
-		window.open(`${window.location.origin}/_layouts/15/search.aspx/?q=${keyword}`, '_blank');
+		if (props.searchPageUrl) window.open(`${props.searchPageUrl}?q=${keyword}`, '_blank');
 	};
 
 	const _onToggleCollapse = (props: IGroupDividerProps) => {
@@ -67,7 +67,7 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 			return (
 				<Stack tokens={{ childrenGap: 10 }} horizontal horizontalAlign='start' style={{ marginTop: '10px' }}>
 					<Stack.Item>
-						<Link onClick={_onToggleCollapse(props)} style={{marginTop: '3px'}}>
+						<Link onClick={_onToggleCollapse(props)} style={{ marginTop: '3px' }}>
 							{props.group!.isCollapsed ? <Icon iconName='CaretRight8' /> : <Icon iconName='CaretDown8' />}
 						</Link>
 					</Stack.Item>
@@ -75,7 +75,7 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 						{props.group?.name} ({props.group?.count}) -
 					</Stack.Item>
 					<Stack.Item>
-						<Link onClick={() => _openSearchPage(props.group?.name)} style={{marginTop: '2px'}}>Show More...</Link>
+						<Link onClick={() => _openSearchPage(props.group?.name)} style={{ marginTop: '2px' }}>Show More...</Link>
 					</Stack.Item>
 				</Stack>
 			)
@@ -84,35 +84,34 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 
 	useEffect(() => {
 		(async () => {
-			await demo();
+			if (props.docLibraryName && props.metadataFieldName) await loadDocuments();
 		})();
 	}, []);
 
 	return (
 		<section className={`${styles.docGroupByMeta} ${hasTeamsContext ? styles.teams : ''}`}>
-			<div className={styles.welcome}>
-				<img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-				<h2>Well done, {escape(userDisplayName)}!</h2>
-				<div>{environmentMessage}</div>
-			</div>
-			<div>
-				<h3>Welcome to SharePoint Framework!</h3>
-				<DetailsList
-					componentRef={root}
-					items={items}
-					groups={groups}
-					columns={columns}
-					ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-					ariaLabelForSelectionColumn="Toggle selection"
-					checkButtonAriaLabel="select row"
-					checkButtonGroupAriaLabel="select section"
-					groupProps={{
-						onRenderHeader: _onRenderGroupHeader,
-						groupedListAs: GroupedListV2FC
-					}}
-					selectionMode={SelectionMode.none}
-				/>
-			</div>
+			{props.docLibraryName && props.metadataFieldName ? (
+				<div>
+					<DetailsList
+						componentRef={root}
+						items={items}
+						groups={groups}
+						columns={columns}
+						ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+						ariaLabelForSelectionColumn="Toggle selection"
+						checkButtonAriaLabel="select row"
+						checkButtonGroupAriaLabel="select section"
+						groupProps={{
+							onRenderHeader: _onRenderGroupHeader,
+							groupedListAs: GroupedListV2FC
+						}}
+						selectionMode={SelectionMode.none}
+					/>
+				</div>
+			) : (
+				<MessageBar messageBarType={MessageBarType.warning}>Webpart configuration missing...</MessageBar>
+			)}
+
 		</section>
 	);
 

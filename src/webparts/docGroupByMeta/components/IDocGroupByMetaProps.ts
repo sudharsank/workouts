@@ -8,4 +8,7 @@ export interface IDocGroupByMetaProps {
 	userDisplayName: string;
 	sp: SPFI;
 	currentTheme: IReadonlyTheme | undefined;
+	docLibraryName: string;
+	metadataFieldName: string;
+	searchPageUrl: string;
 }

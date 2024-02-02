@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import {
+	PropertyPaneTextField,
 	type IPropertyPaneConfiguration
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -13,7 +14,9 @@ import { IDocGroupByMetaProps } from './components/IDocGroupByMetaProps';
 import { getSP } from '../../pnp.config';
 
 export interface IDocGroupByMetaWebPartProps {
-
+	docLibraryName: string;
+	metadataFieldName: string;
+	searchPageUrl: string;
 }
 
 export default class DocGroupByMetaWebPart extends BaseClientSideWebPart<IDocGroupByMetaWebPartProps> {
@@ -32,7 +35,10 @@ export default class DocGroupByMetaWebPart extends BaseClientSideWebPart<IDocGro
 				environmentMessage: this._environmentMessage,
 				hasTeamsContext: !!this.context.sdks.microsoftTeams,
 				userDisplayName: this.context.pageContext.user.displayName,
-				currentTheme: this._currentTheme
+				currentTheme: this._currentTheme,
+				docLibraryName: this.properties.docLibraryName,
+				metadataFieldName: this.properties.metadataFieldName,
+				searchPageUrl: this.properties.searchPageUrl
 			}
 		);
 
@@ -109,7 +115,27 @@ export default class DocGroupByMetaWebPart extends BaseClientSideWebPart<IDocGro
 					header: {
 						description: strings.PropertyPaneDescription
 					},
-					groups: []
+					groups: [
+						{
+							groupFields:[
+								PropertyPaneTextField('docLibraryName', {
+									label: 'Document library name',
+									multiline: false,
+									value: this.properties.docLibraryName
+								}),
+								PropertyPaneTextField('metadataFieldName', {
+									label: 'Metadata Field name',
+									multiline: false,
+									value: this.properties.metadataFieldName
+								}),
+								PropertyPaneTextField('searchPageUrl', {
+									label: 'Search results URL',
+									multiline: false,
+									value: this.properties.searchPageUrl
+								})
+							]
+						}
+					]
 				}
 			]
 		};
