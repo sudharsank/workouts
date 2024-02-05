@@ -2,9 +2,11 @@ import * as React from 'react';
 import { useEffect, useState, FC } from 'react';
 import styles from './DocGroupByMeta.module.scss';
 import type { IDocGroupByMetaProps } from './IDocGroupByMetaProps';
-import { escape } from '@microsoft/sp-lodash-subset';
 import * as _ from 'lodash';
-import { DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsHeaderProps, IDetailsList, IGroup, IGroupDividerProps, IRenderFunction, Icon, Link, MessageBar, MessageBarType, SelectionMode, Stack } from '@fluentui/react';
+import {
+	DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsList, IGroup,
+	IGroupDividerProps, Icon, Link, MessageBar, MessageBarType, SelectionMode, Stack
+} from '@fluentui/react';
 import { GroupedListV2FC } from '@fluentui/react/lib/GroupedList';
 
 const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
@@ -19,12 +21,6 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 	const [groups, setGroups] = React.useState<IGroup[]>([]);
 
 	const loadDocuments = async () => {
-		// const tempQuery = `<Where>
-		// 						<Contains>
-		// 							<FieldRef Name="Categories0"/>
-		// 							<Value Type="TaxonomyFieldType">Credit</Value>
-		// 						</Contains>
-		// 					</Where>`;
 		const query: string = `<View Scope="RecursiveAll"><Query></Query>
 									<ViewFields>
 										<FieldRef Name='${props.metadataFieldName}'/><FieldRef Name='FileRef'/>
@@ -40,8 +36,8 @@ const DocGroupByMeta: FC<IDocGroupByMetaProps> = (props) => {
 				key: groupkey,
 				name: groupkey,
 				count: value.length,
-				startIndex: _.indexOf(docs, _.filter(docs, (d: any) => d.Categories0.Label == groupkey)[0]),
-				data: _.filter(docs, (d: any) => d.Categories0.Label == groupkey),
+				startIndex: _.indexOf(docs, _.filter(docs, (d: any) => d[`${props.metadataFieldName}.Label`] == groupkey)[0]),
+				data: _.filter(docs, (d: any) => d[`${props.metadataFieldName}.Label`] == groupkey),
 				level: 0
 			});
 		});
