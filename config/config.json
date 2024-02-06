@@ -9,10 +9,19 @@
           "manifest": "./src/webparts/docGroupByMeta/DocGroupByMetaWebPart.manifest.json"
         }
       ]
+    },
+    "docs-group-by-ent-keyword-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/docsGroupByEntKeyword/DocsGroupByEntKeywordWebPart.js",
+          "manifest": "./src/webparts/docsGroupByEntKeyword/DocsGroupByEntKeywordWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
-    "DocGroupByMetaWebPartStrings": "lib/webparts/docGroupByMeta/loc/{locale}.js"
+    "DocGroupByMetaWebPartStrings": "lib/webparts/docGroupByMeta/loc/{locale}.js",
+    "DocsGroupByEntKeywordWebPartStrings": "lib/webparts/docsGroupByEntKeyword/loc/{locale}.js"
   }
 }

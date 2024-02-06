@@ -117,7 +117,7 @@ export default class DocGroupByMetaWebPart extends BaseClientSideWebPart<IDocGro
 					},
 					groups: [
 						{
-							groupFields:[
+							groupFields: [
 								PropertyPaneTextField('docLibraryName', {
 									label: 'Document library name',
 									multiline: false,
