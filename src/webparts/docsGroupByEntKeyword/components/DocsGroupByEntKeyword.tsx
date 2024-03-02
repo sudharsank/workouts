@@ -2,14 +2,13 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import styles from './DocsGroupByEntKeyword.module.scss';
 import type { IDocsGroupByEntKeywordProps } from './IDocsGroupByEntKeywordProps';
-import { escape } from '@microsoft/sp-lodash-subset';
 import * as _ from 'lodash';
 import {
     DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsList, IGroup,
     IGroupDividerProps, Icon, Link, MessageBar, MessageBarType, SelectionMode, Stack
 } from '@fluentui/react';
 import { GroupedListV2FC } from '@fluentui/react/lib/GroupedList';
-import { ISearchQuery, SearchResults, SearchQueryBuilder } from "@pnp/sp/search";
+import { ISearchQuery, SearchResults } from "@pnp/sp/search";
 
 export interface IDocs {
     Name: string;
@@ -29,22 +28,6 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
     const [groups, setGroups] = React.useState<IGroup[]>([]);
 
     const loadDocuments = async () => {
-
-        // let groupedDocs = _.groupBy(finaldocs, 'Keyword');
-        // let docGroups: IGroup[] = [];
-        // _.map(groupedDocs, (value, groupkey) => {
-        //     docGroups.push({
-        //         key: groupkey,
-        //         name: groupkey,
-        //         count: value.length,
-        //         startIndex: _.indexOf(finaldocs, _.filter(finaldocs, (d: any) => d.Keyword == groupkey)[0]),
-        //         data: _.filter(finaldocs, (d: any) => d.Keyword == groupkey),
-        //         level: 0
-        //     });
-        // });
-        // setItems(finaldocs);
-        // setGroups(docGroups);
-
         let finalDocs: IDocs[] = [];
         const enterpriseKeywordsManagedProperty = "ows_MetadataFacetInfo";
         const pathManagedProperty = "Path";
@@ -69,25 +52,22 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
         }
         const results: SearchResults = await props.sp.search(searchQuery);
 
-        console.log(results.ElapsedTime);
-        console.log(results.RowCount);
-        console.log(results.PrimarySearchResults);
+        // console.log(results.ElapsedTime);
+        // console.log(results.RowCount);
+        // console.log(results.PrimarySearchResults);
         let searchResults: any[] = results.PrimarySearchResults;
         console.log(searchResults[0][enterpriseKeywordsManagedProperty]);
         searchResults.map((result: any) => {
             props.keywords.split(',').map((key: string) => {
-                if(result[enterpriseKeywordsManagedProperty].toLowerCase().indexOf(key) >= 0) {
-                    //if(_.filter(finalDocs, (d:IDocs) => d.Keyword.toLowerCase() === key.toLowerCase()).length < 5) {
+                if(result[enterpriseKeywordsManagedProperty].toLowerCase().indexOf(key.toLowerCase()) >= 0) {
                         finalDocs.push({
                             Keyword: key,
                             Name: result.Filename,
                             FileUrl: result.DefaultEncodingURL
                         });
-                    //}
                 }
             })
         });
-        console.log(finalDocs);
         finalDocs = _.sortBy(finalDocs, 'Keyword');
         var groupedDocs = _.groupBy(finalDocs, 'Keyword');
         let docGroups: IGroup[] = [];
@@ -150,7 +130,7 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
         }
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         console.log(props);
         (async () => {
             if (props.siteUrl && props.keywords) await loadDocuments();

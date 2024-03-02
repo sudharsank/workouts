@@ -108,6 +108,10 @@ export default class DocsGroupByEntKeywordWebPart extends BaseClientSideWebPart<
         return Version.parse('1.0');
     }
 
+    protected override get disableReactivePropertyChanges(): boolean {
+        return true;
+    }
+
     protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
         return {
             pages: [
