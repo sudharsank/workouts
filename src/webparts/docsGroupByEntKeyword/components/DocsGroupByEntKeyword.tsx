@@ -5,7 +5,7 @@ import type { IDocsGroupByEntKeywordProps } from './IDocsGroupByEntKeywordProps'
 import * as _ from 'lodash';
 import {
     DetailsList, IColumn, IDetailsGroupRenderProps, IDetailsList, IGroup,
-    IGroupDividerProps, Icon, Link, MessageBar, MessageBarType, SelectionMode, Stack
+    IGroupDividerProps, Icon, Link, MessageBar, MessageBarType, SelectionMode, Spinner, SpinnerSize, Stack
 } from '@fluentui/react';
 import { GroupedListV2FC } from '@fluentui/react/lib/GroupedList';
 import { ISearchQuery, SearchResults } from "@pnp/sp/search";
@@ -24,6 +24,7 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
         userDisplayName
     } = props;
 
+    const [loading, setLoading] = useState<boolean>(true);
     const [items, setItems] = useState<any[]>([]);
     const [groups, setGroups] = React.useState<IGroup[]>([]);
 
@@ -51,38 +52,36 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
                 "Created"]
         }
         const results: SearchResults = await props.sp.search(searchQuery);
-
-        // console.log(results.ElapsedTime);
-        // console.log(results.RowCount);
-        // console.log(results.PrimarySearchResults);
+        
         let searchResults: any[] = results.PrimarySearchResults;
         console.log(searchResults[0][enterpriseKeywordsManagedProperty]);
         searchResults.map((result: any) => {
             props.keywords.split(',').map((key: string) => {
-                if(result[enterpriseKeywordsManagedProperty].toLowerCase().indexOf(key.toLowerCase()) >= 0) {
-                        finalDocs.push({
-                            Keyword: key,
-                            Name: result.Filename,
-                            FileUrl: result.DefaultEncodingURL
-                        });
+                if (result[enterpriseKeywordsManagedProperty].toLowerCase().indexOf(key.toLowerCase()) >= 0) {
+                    finalDocs.push({
+                        Keyword: key,
+                        Name: result.Filename,
+                        FileUrl: result.DefaultEncodingURL
+                    });
                 }
             })
         });
         finalDocs = _.sortBy(finalDocs, 'Keyword');
-        var groupedDocs = _.groupBy(finalDocs, 'Keyword');
+        let groupedDocs = _.groupBy(finalDocs, 'Keyword');
         let docGroups: IGroup[] = [];
         _.map(groupedDocs, (value, groupkey) => {
-         docGroups.push({
-             key: groupkey,
-             name: groupkey,
-             count: value.length,
-             startIndex: _.indexOf(finalDocs, _.filter(finalDocs, (d: any) => d[`Keyword`] == groupkey)[0]),
-             data: _.filter(finalDocs, (d: any) => d[`Keyword`] == groupkey),
-             level: 0
-         });
+            docGroups.push({
+                key: groupkey,
+                name: groupkey,
+                count: value.length,
+                startIndex: _.indexOf(finalDocs, _.filter(finalDocs, (d: any) => d[`Keyword`] == groupkey)[0]),
+                data: _.filter(finalDocs, (d: any) => d[`Keyword`] == groupkey),
+                level: 0
+            });
         });
         setItems(finalDocs);
         setGroups(docGroups);
+        setLoading(false);
     };
 
     const _onNavigate = (targeturl: string) => {
@@ -131,36 +130,38 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
     };
 
     useEffect(() => {
-        console.log(props);
-        (async () => {
-            if (props.siteUrl && props.keywords) await loadDocuments();
-        })();
+        loadDocuments();
     }, []);
 
     return (
         <section className={`${styles.docsGroupByEntKeyword} ${hasTeamsContext ? styles.teams : ''}`}>
-            {props.siteUrl && props.keywords ? (
-                <div>
-                    <DetailsList
-                        componentRef={root}
-                        items={items}
-                        groups={groups}
-                        columns={columns}
-                        ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                        ariaLabelForSelectionColumn="Toggle selection"
-                        checkButtonAriaLabel="select row"
-                        checkButtonGroupAriaLabel="select section"
-                        groupProps={{
-                            onRenderHeader: _onRenderGroupHeader,
-                            groupedListAs: GroupedListV2FC
-                        }}
-                        selectionMode={SelectionMode.none}
-                    />
-                </div>
+            {loading ? (
+                <Spinner size={SpinnerSize.large} label='Please wait...' labelPosition='top' />
             ) : (
-                <MessageBar messageBarType={MessageBarType.warning}>Webpart configuration missing...</MessageBar>
+                <>
+                    {props.siteUrl && props.keywords ? (
+                        <div>
+                            <DetailsList
+                                componentRef={root}
+                                items={items}
+                                groups={groups}
+                                columns={columns}
+                                ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                                ariaLabelForSelectionColumn="Toggle selection"
+                                checkButtonAriaLabel="select row"
+                                checkButtonGroupAriaLabel="select section"
+                                groupProps={{
+                                    onRenderHeader: _onRenderGroupHeader,
+                                    groupedListAs: GroupedListV2FC
+                                }}
+                                selectionMode={SelectionMode.none}
+                            />
+                        </div>
+                    ) : (
+                        <MessageBar messageBarType={MessageBarType.warning}>Webpart configuration missing...</MessageBar>
+                    )}
+                </>
             )}
-
         </section>
     );
 
