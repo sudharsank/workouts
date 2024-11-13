@@ -17,11 +17,29 @@
           "manifest": "./src/webparts/docsGroupByEntKeyword/DocsGroupByEntKeywordWebPart.manifest.json"
         }
       ]
+    },
+    "test-multitenant-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/testMultitenant/TestMultitenantWebPart.js",
+          "manifest": "./src/webparts/testMultitenant/TestMultitenantWebPart.manifest.json"
+        }
+      ]
+    },
+    "brand-font-demo-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/brandFontDemo/BrandFontDemoWebPart.js",
+          "manifest": "./src/webparts/brandFontDemo/BrandFontDemoWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "DocGroupByMetaWebPartStrings": "lib/webparts/docGroupByMeta/loc/{locale}.js",
-    "DocsGroupByEntKeywordWebPartStrings": "lib/webparts/docsGroupByEntKeyword/loc/{locale}.js"
+    "DocsGroupByEntKeywordWebPartStrings": "lib/webparts/docsGroupByEntKeyword/loc/{locale}.js",
+    "TestMultitenantWebPartStrings": "lib/webparts/testMultitenant/loc/{locale}.js",
+    "BrandFontDemoWebPartStrings": "lib/webparts/brandFontDemo/loc/{locale}.js"
   }
 }

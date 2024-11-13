@@ -54,7 +54,6 @@ const DocsGroupByEntKeyword: React.FC<IDocsGroupByEntKeywordProps> = (props) => 
         const results: SearchResults = await props.sp.search(searchQuery);
         
         let searchResults: any[] = results.PrimarySearchResults;
-        console.log(searchResults[0][enterpriseKeywordsManagedProperty]);
         searchResults.map((result: any) => {
             props.keywords.split(',').map((key: string) => {
                 if (result[enterpriseKeywordsManagedProperty].toLowerCase().indexOf(key.toLowerCase()) >= 0) {
